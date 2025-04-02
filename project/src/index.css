@@ -1,0 +1,41 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --color-primary: 46 139 87;    /* Forest Green */
+    --color-secondary: 157 193 131; /* Sage Green */
+    --color-accent: 152 251 152;    /* Mint Green */
+    --color-background: 255 248 225; /* Cream */
+    --color-text: 51 51 51;         /* Dark Charcoal */
+    --color-highlight: 245 222 179; /* Soft Gold */
+  }
+
+  body {
+    @apply bg-background text-text;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply bg-primary hover:bg-primary/90 text-white font-semibold py-2 px-6 rounded-lg 
+           transition-colors duration-200 shadow-lg hover:shadow-xl;
+  }
+  
+  .card {
+    @apply bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-shadow duration-200;
+  }
+
+  .section-title {
+    @apply text-3xl font-bold text-text mb-6;
+  }
+
+  .nav-icon {
+    @apply text-gray-700 hover:text-primary transition-colors;
+  }
+
+  .stat-card {
+    @apply bg-white rounded-lg p-4 text-center shadow-sm hover:shadow-md transition-shadow;
+  }
+}
