@@ -2,40 +2,43 @@
 @tailwind components;
 @tailwind utilities;
 
-@layer base {
-  :root {
-    --color-primary: 46 139 87;    /* Forest Green */
-    --color-secondary: 157 193 131; /* Sage Green */
-    --color-accent: 152 251 152;    /* Mint Green */
-    --color-background: 255 248 225; /* Cream */
-    --color-text: 51 51 51;         /* Dark Charcoal */
-    --color-highlight: 245 222 179; /* Soft Gold */
-  }
+:root {
+  --color-primary: 46 139 87;    /* Forest Green */
+  --color-secondary: 157 193 131; /* Sage Green */
+  --color-accent: 152 251 152;    /* Mint Green */
+  --color-background: 255 248 225; /* Cream */
+  --color-text: 51 51 51;         /* Dark Charcoal */
+  --color-highlight: 245 222 179; /* Soft Gold */
+}
 
+@layer base {
   body {
-    @apply bg-background text-text;
+    @apply bg-background text-text font-sans antialiased;
   }
 }
 
 @layer components {
   .btn-primary {
-    @apply bg-primary hover:bg-primary/90 text-white font-semibold py-2 px-6 rounded-lg 
-           transition-colors duration-200 shadow-lg hover:shadow-xl;
-  }
-  
-  .card {
-    @apply bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-shadow duration-200;
-  }
-
-  .section-title {
-    @apply text-3xl font-bold text-text mb-6;
+    @apply inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-primary hover:bg-secondary focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary;
   }
 
   .nav-icon {
-    @apply text-gray-700 hover:text-primary transition-colors;
+    @apply text-gray-500 hover:text-primary transition-colors;
+  }
+
+  .card {
+    @apply p-6 rounded-xl shadow-sm bg-white transition-all duration-300 hover:shadow-lg hover:scale-105;
+  }
+
+  .section-title {
+    @apply text-3xl font-bold text-gray-900;
   }
 
   .stat-card {
-    @apply bg-white rounded-lg p-4 text-center shadow-sm hover:shadow-md transition-shadow;
+    @apply bg-white rounded-lg p-4 text-center shadow-sm hover:shadow-md transition-all duration-300 hover:scale-105;
+  }
+
+  .feature-card {
+    @apply card bg-white/80 backdrop-blur transition-all duration-300 hover:bg-white hover:shadow-lg hover:scale-105;
   }
 }

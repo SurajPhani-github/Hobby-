@@ -1,49 +1,22 @@
 import React, { useState } from 'react';
+import { useStore } from '../store/useStore';
 import { Heart, MessageCircle, Share2, Bookmark, MoreHorizontal, Send } from 'lucide-react';
+import { formatDistanceToNow } from 'date-fns';
 
-const posts = [
-  {
-    id: 1,
-    user: {
-      name: 'Sarah Chen',
-      avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150',
-      domain: 'Design'
-    },
-    content: {
-      text: 'Just finished my latest UI design project! What do you think?',
-      image: 'https://images.unsplash.com/photo-1618788372246-79faff0c3742?w=600'
-    },
-    likes: 234,
-    comments: [
-      { id: 1, user: 'Alex Kim', text: 'Love the color scheme!', timestamp: '15m' },
-      { id: 2, user: 'Maria Garcia', text: 'The layout is so clean 👏', timestamp: '5m' }
-    ],
-    timestamp: '2h'
-  },
-  {
-    id: 2,
-    user: {
-      name: 'Alex Kumar',
-      avatar: 'https://images.unsplash.com/photo-1599566150163-29194dcaad36?w=150',
-      domain: 'Programming'
-    },
-    content: {
-      text: 'Built my first React Native app! Here\'s a sneak peek of the interface.',
-      image: 'https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?w=600'
-    },
-    likes: 189,
-    comments: [
-      { id: 1, user: 'John Doe', text: 'Great work! How long did it take?', timestamp: '10m' }
-    ],
-    timestamp: '4h'
-  }
-];
+interface FeedProps {
+  domain: string;
+}
 
-export const Feed = () => {
-  const [newComments, setNewComments] = useState<{[key: number]: string}>({});
-  const [expandedComments, setExpandedComments] = useState<{[key: number]: boolean}>({});
+export const Feed: React.FC<FeedProps> = ({ domain }) => {
+  const { posts, likedPosts, savedPosts, toggleLike, toggleSave } = useStore();
+  const [expandedComments, setExpandedComments] = useState<{[key: string]: boolean}>({});
+  const [newComments, setNewComments] = useState<{[key: string]: string}>({});
 
-  const handleCommentSubmit = (postId: number) => {
+  const toggleComments = (postId: string) => {
+    setExpandedComments(prev => ({ ...prev, [postId]: !prev[postId] }));
+  };
+
+  const handleCommentSubmit = (postId: string) => {
     if (newComments[postId]?.trim()) {
       // In a real app, this would make an API call to save the comment
       setNewComments(prev => ({ ...prev, [postId]: '' }));
@@ -51,98 +24,131 @@ export const Feed = () => {
   };
 
   return (
-    <div className="max-w-xl mx-auto py-6 px-4 space-y-4">
-      {posts.map(post => (
-        <div key={post.id} className="bg-white rounded-lg shadow-sm overflow-hidden">
-          {/* Header */}
-          <div className="p-3 flex items-center justify-between">
-            <div className="flex items-center space-x-2">
-              <img src={post.user.avatar} alt={post.user.name} className="w-8 h-8 rounded-full" />
-              <div>
-                <h3 className="font-medium text-sm">{post.user.name}</h3>
-                <p className="text-xs text-gray-500">{post.user.domain} • {post.timestamp}</p>
+    <div className="max-w-2xl mx-auto py-6 px-4 space-y-6">
+      {posts
+        .filter(post => post.domain === domain)
+        .map(post => (
+          <div key={post.id} className="bg-white rounded-lg shadow-sm overflow-hidden">
+            {/* Header */}
+            <div className="p-3 flex items-center justify-between border-b">
+              <div className="flex items-center space-x-2">
+                <img 
+                  src={post.user.avatar_url} 
+                  alt={post.user.name} 
+                  className="w-8 h-8 rounded-full object-cover"
+                />
+                <div>
+                  <h3 className="font-medium text-sm">{post.user.name}</h3>
+                  <p className="text-xs text-gray-500">@{post.user.username}</p>
+                </div>
               </div>
-            </div>
-            <button className="text-gray-500">
-              <MoreHorizontal className="w-4 h-4" />
-            </button>
-          </div>
-          
-          {/* Image */}
-          <img src={post.content.image} alt="" className="w-full aspect-[4/3] object-cover" />
-          
-          {/* Actions */}
-          <div className="p-3">
-            <div className="flex items-center justify-between mb-2">
-              <div className="flex items-center space-x-3">
-                <button className="text-gray-700 hover:text-red-500 transition-colors">
-                  <Heart className="w-5 h-5" />
-                </button>
-                <button className="text-gray-700 hover:text-primary transition-colors">
-                  <MessageCircle className="w-5 h-5" />
-                </button>
-                <button className="text-gray-700 hover:text-primary transition-colors">
-                  <Share2 className="w-5 h-5" />
-                </button>
-              </div>
-              <button className="text-gray-700 hover:text-primary transition-colors">
-                <Bookmark className="w-5 h-5" />
+              <button className="text-gray-500 p-1">
+                <MoreHorizontal className="w-4 h-4" />
               </button>
             </div>
             
-            {/* Caption */}
-            <div className="space-y-1">
-              <p className="text-sm font-medium">{post.likes} likes</p>
-              <p className="text-sm">
-                <span className="font-medium">{post.user.name}</span>{' '}
-                {post.content.text}
-              </p>
-            </div>
-
-            {/* Comments */}
-            <div className="mt-2">
-              {post.comments.slice(0, expandedComments[post.id] ? undefined : 2).map(comment => (
-                <div key={comment.id} className="text-sm mt-1">
-                  <span className="font-medium">{comment.user}</span>{' '}
-                  {comment.text}
-                  <span className="text-xs text-gray-500 ml-2">{comment.timestamp}</span>
-                </div>
-              ))}
-              
-              {post.comments.length > 2 && !expandedComments[post.id] && (
-                <button 
-                  className="text-gray-500 text-sm mt-1"
-                  onClick={() => setExpandedComments(prev => ({ ...prev, [post.id]: true }))}
-                >
-                  View all {post.comments.length} comments
-                </button>
-              )}
-
-              {/* Comment Input */}
-              <div className="mt-2 flex items-center space-x-2">
-                <input
-                  type="text"
-                  value={newComments[post.id] || ''}
-                  onChange={(e) => setNewComments(prev => ({ ...prev, [post.id]: e.target.value }))}
-                  placeholder="Add a comment..."
-                  className="flex-1 text-sm bg-gray-50 rounded px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-primary"
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
-                      handleCommentSubmit(post.id);
-                    }
-                  }}
+            {/* Image */}
+            {post.image_url && (
+              <div className="aspect-square relative">
+                <img 
+                  src={post.image_url} 
+                  alt="" 
+                  className="absolute inset-0 w-full h-full object-cover"
                 />
+              </div>
+            )}
+            
+            {/* Actions */}
+            <div className="p-3 space-y-2">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-4">
+                  <button 
+                    onClick={() => toggleLike(post.id)}
+                    className={`p-1 transition-colors ${
+                      likedPosts.has(post.id) ? 'text-red-500' : 'text-gray-700 hover:text-red-500'
+                    }`}
+                  >
+                    <Heart className="w-5 h-5" />
+                  </button>
+                  <button 
+                    onClick={() => toggleComments(post.id)}
+                    className="p-1 text-gray-700 hover:text-primary transition-colors"
+                  >
+                    <MessageCircle className="w-5 h-5" />
+                  </button>
+                  <button className="p-1 text-gray-700 hover:text-primary transition-colors">
+                    <Share2 className="w-5 h-5" />
+                  </button>
+                </div>
                 <button 
-                  onClick={() => handleCommentSubmit(post.id)}
-                  className="text-primary hover:text-primary/80 transition-colors"
+                  onClick={() => toggleSave(post.id)}
+                  className={`p-1 transition-colors ${
+                    savedPosts.has(post.id) ? 'text-primary' : 'text-gray-700 hover:text-primary'
+                  }`}
                 >
-                  <Send className="w-4 h-4" />
+                  <Bookmark className="w-5 h-5" />
                 </button>
               </div>
+              
+              {/* Content */}
+              <div className="space-y-1">
+                <p className="text-sm font-medium">{post.likes.toLocaleString()} likes</p>
+                <p className="text-sm">
+                  <span className="font-medium">{post.user.username}</span>{' '}
+                  {post.content}
+                </p>
+                <p className="text-xs text-gray-500">
+                  {formatDistanceToNow(new Date(post.created_at), { addSuffix: true })}
+                </p>
+              </div>
+
+              {/* Comments Preview */}
+              <button 
+                className="text-sm text-gray-500 hover:text-gray-700"
+                onClick={() => toggleComments(post.id)}
+              >
+                View all comments
+              </button>
+
+              {/* Comments Section */}
+              {expandedComments[post.id] && (
+                <div className="mt-2 space-y-2">
+                  {/* Sample comments - in a real app, these would come from the API */}
+                  <div className="text-sm">
+                    <span className="font-medium">user123</span>{' '}
+                    Great post! Keep it up!
+                  </div>
+                  <div className="text-sm">
+                    <span className="font-medium">designer456</span>{' '}
+                    Love the creativity!
+                  </div>
+
+                  {/* Comment Input */}
+                  <div className="flex items-center space-x-2">
+                    <input
+                      type="text"
+                      value={newComments[post.id] || ''}
+                      onChange={(e) => setNewComments(prev => ({ ...prev, [post.id]: e.target.value }))}
+                      placeholder="Add a comment..."
+                      className="flex-1 text-sm bg-gray-50 rounded px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-primary"
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          handleCommentSubmit(post.id);
+                        }
+                      }}
+                    />
+                    <button 
+                      onClick={() => handleCommentSubmit(post.id)}
+                      className="text-primary hover:text-primary/80 transition-colors"
+                    >
+                      <Send className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
-        </div>
-      ))}
+        ))}
     </div>
   );
 };

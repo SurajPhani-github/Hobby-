@@ -1,13 +1,26 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
-import { Home, Search, PlusSquare, Heart, User } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import { Home, Search, PlusSquare, Heart, User, LogOut, Settings } from 'lucide-react';
+import { useStore } from '../store/useStore';
 
-export const Navbar = () => {
+interface NavbarProps {
+  onLogout: () => void;
+}
+
+export const Navbar = ({ onLogout }: NavbarProps) => {
+  const navigate = useNavigate();
+  const { user } = useStore();
+
+  const handleLogout = () => {
+    onLogout();
+    navigate('/auth');
+  };
+
   return (
     <nav className="fixed top-0 left-0 right-0 bg-white border-b border-gray-200 z-50">
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
-          <Link to="/" className="text-2xl font-bold text-primary">SP</Link>
+          <Link to="/" className="text-2xl font-bold text-primary">GITAM Hub</Link>
           
           <div className="hidden md:flex items-center space-x-4 flex-1 max-w-xl mx-8">
             <div className="relative w-full">
@@ -33,6 +46,23 @@ export const Navbar = () => {
             <Link to="/profile" className="nav-icon">
               <User className="w-6 h-6" />
             </Link>
+            <Link to="/admin" className="nav-icon">
+              <Settings className="w-6 h-6" />
+            </Link>
+            {user && (
+              <div className="flex items-center space-x-4">
+                <span className="text-sm text-gray-700">
+                  {user.name}
+                </span>
+                <button
+                  onClick={handleLogout}
+                  className="flex items-center space-x-1 text-sm text-gray-600 hover:text-gray-900"
+                >
+                  <LogOut className="w-4 h-4" />
+                  <span>Logout</span>
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </div>

@@ -31,11 +31,18 @@ export const domains = {
     ],
     challenges: [
       {
-        id: 1,
+        id: 'challenge-1',
         title: '30 Days of Code',
         description: 'Complete daily coding challenges for 30 days',
         participants: 234,
         deadline: '2024-04-01'
+      },
+      {
+        id: 'challenge-2',
+        title: 'Build a Portfolio Website',
+        description: 'Create a responsive portfolio website using modern web technologies',
+        participants: 156,
+        deadline: '2024-04-15'
       }
     ]
   },
@@ -69,11 +76,18 @@ export const domains = {
     ],
     challenges: [
       {
-        id: 1,
+        id: 'challenge-3',
         title: 'Daily UI Challenge',
         description: 'Create a unique UI design every day for 100 days',
         participants: 156,
         deadline: '2024-05-01'
+      },
+      {
+        id: 'challenge-4',
+        title: 'Brand Identity Design',
+        description: 'Design a complete brand identity for a fictional company',
+        participants: 89,
+        deadline: '2024-04-20'
       }
     ]
   },

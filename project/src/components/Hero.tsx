@@ -7,7 +7,7 @@ export const Hero = () => {
       <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-secondary/10" />
       <div className="container mx-auto px-4 relative z-10">
         <div className="max-w-4xl mx-auto text-center">
-          <h1 className="text-5xl md:text-6xl font-bold text-text mb-6">
+          <h1 className="text-5xl md:text-6xl font-bold text-primary mb-6">
             Connect, Learn, Evolve
             <span className="block text-primary">Beyond the Rat Race</span>
           </h1>
@@ -36,9 +36,9 @@ export const Hero = () => {
                 description: "Discover and create opportunities for your future career"
               }
             ].map((item, index) => (
-              <div key={index} className="card bg-white/80 backdrop-blur">
+              <div key={index} className="feature-card">
                 <div className="text-primary mb-4">{item.icon}</div>
-                <h3 className="text-xl font-semibold mb-2">{item.title}</h3>
+                <h3 className="text-xl font-semibold mb-2 text-primary">{item.title}</h3>
                 <p className="text-text/70">{item.description}</p>
               </div>
             ))}
