@@ -20,7 +20,7 @@ export const Discussion = () => {
     },
     {
       id: '2',
-      user: { name: 'Priya Patel' },
+      user: { name: 'Pawan Kalyan' },
       content: 'I\'m good! Working on the new project.',
       created_at: new Date().toISOString()
     },

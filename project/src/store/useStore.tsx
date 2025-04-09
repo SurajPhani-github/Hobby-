@@ -1,18 +1,7 @@
 import { create } from 'zustand';
 import { domains } from '../data/domains';
-
-interface User {
-  id: string;
-  name: string;
-  email: string;
-  username?: string;
-  avatar_url?: string;
-  phone?: string;
-  department?: string;
-  year?: string;
-  rollNo?: string;
-  dob?: string;
-}
+import { Post as PostType, User, Challenge, ChallengeRegistration } from '../types';
+import { api } from '../services/api';
 
 interface Post {
   id: string;
@@ -39,38 +28,17 @@ interface Discussion {
   participants: number;
 }
 
-interface Challenge {
-  id: string;
-  title: string;
-  description: string;
-  deadline: string;
-  participants: number;
-}
-
-interface ChallengeRegistration {
-  id: string;
-  userId: string;
-  challengeId: string;
-  name: string;
-  email: string;
-  department: string;
-  year: string;
-  rollNo: string;
-  motivation: string;
-  experience: string;
-  registrationDate: string;
-}
-
 interface Store {
-  posts: Post[];
+  user: User | null;
+  users: User[];
+  posts: PostType[];
   likedPosts: Set<string>;
   savedPosts: Set<string>;
   discussions: Discussion[];
   currentDiscussion: Discussion | null;
   challenges: Challenge[];
   loading: boolean;
-  user: User | null;
-  users: User[];
+  error: string | null;
   challengeRegistrations: ChallengeRegistration[];
   setUser: (user: User | null) => void;
   registerUser: (userData: Omit<User, 'id'>) => void;
@@ -85,6 +53,7 @@ interface Store {
   getDomain: (id: string) => typeof domains[keyof typeof domains] | undefined;
   getDomainPosts: (domainId: string) => Post[];
   getDomainChallenges: (domainId: string) => Challenge[];
+  createPost: (post: Omit<Post, 'id' | 'created_at'>) => Promise<void>;
 }
 
 const INDIAN_NAMES = [
@@ -115,6 +84,8 @@ function getRandomUser(): User {
 }
 
 export const useStore = create<Store>((set, get) => ({
+  user: null,
+  users: [],
   posts: [],
   likedPosts: new Set(),
   savedPosts: new Set(),
@@ -135,8 +106,7 @@ export const useStore = create<Store>((set, get) => ({
   currentDiscussion: null,
   challenges: [],
   loading: false,
-  user: null,
-  users: [],
+  error: null,
   challengeRegistrations: [],
 
   setUser: (user) => {
@@ -210,54 +180,38 @@ export const useStore = create<Store>((set, get) => ({
     })) || [];
   },
 
-  fetchPosts: async (domain?: string) => {
-    set({ loading: true });
+  fetchPosts: async (domain) => {
+    set({ loading: true, error: null });
     try {
-      const domainPosts = domain ? get().getDomainPosts(domain) : [];
-      set({ posts: domainPosts });
+      const posts = await api.getPosts(domain);
+      set({ posts, loading: false });
     } catch (error) {
-      console.error('Error fetching posts:', error);
-    } finally {
-      set({ loading: false });
+      set({ error: 'Failed to fetch posts', loading: false });
     }
   },
 
-  toggleLike: (postId: string) => {
-    const { likedPosts, posts } = get();
-    const newLikedPosts = new Set(likedPosts);
-    const postIndex = posts.findIndex(p => p.id === postId);
-
-    if (postIndex === -1) return;
-
-    const updatedPosts = [...posts];
-    if (likedPosts.has(postId)) {
-      newLikedPosts.delete(postId);
-      updatedPosts[postIndex] = {
-        ...updatedPosts[postIndex],
-        likes: Math.max(0, updatedPosts[postIndex].likes - 1)
-      };
-    } else {
-      newLikedPosts.add(postId);
-      updatedPosts[postIndex] = {
-        ...updatedPosts[postIndex],
-        likes: updatedPosts[postIndex].likes + 1
-      };
-    }
-
-    set({ likedPosts: newLikedPosts, posts: updatedPosts });
+  toggleLike: (postId) => {
+    set((state) => {
+      const newLikedPosts = new Set(state.likedPosts);
+      if (newLikedPosts.has(postId)) {
+        newLikedPosts.delete(postId);
+      } else {
+        newLikedPosts.add(postId);
+      }
+      return { likedPosts: newLikedPosts };
+    });
   },
 
-  toggleSave: (postId: string) => {
-    const { savedPosts } = get();
-    const newSavedPosts = new Set(savedPosts);
-
-    if (savedPosts.has(postId)) {
-      newSavedPosts.delete(postId);
-    } else {
-      newSavedPosts.add(postId);
-    }
-
-    set({ savedPosts: newSavedPosts });
+  toggleSave: (postId) => {
+    set((state) => {
+      const newSavedPosts = new Set(state.savedPosts);
+      if (newSavedPosts.has(postId)) {
+        newSavedPosts.delete(postId);
+      } else {
+        newSavedPosts.add(postId);
+      }
+      return { savedPosts: newSavedPosts };
+    });
   },
 
   sendMessage: (content: string, domain: string) => {
@@ -302,5 +256,18 @@ export const useStore = create<Store>((set, get) => ({
 
   setCurrentDiscussion: (discussion: Discussion | null) => {
     set({ currentDiscussion: discussion });
+  },
+
+  createPost: async (post) => {
+    set({ loading: true, error: null });
+    try {
+      const newPost = await api.createPost(post);
+      set((state) => ({
+        posts: [newPost, ...state.posts],
+        loading: false
+      }));
+    } catch (error) {
+      set({ error: 'Failed to create post', loading: false });
+    }
   }
 }));
